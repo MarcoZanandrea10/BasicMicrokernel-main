@@ -1,2 +1,3 @@
-# BasicMicrokernel
-A simple microkernel to use in OS subject and run in CodeSpace.
+rm -f *.o kernel.elf
+make
+qemu-system-riscv64 -machine virt -m 128M -kernel kernel.elf -nographic
