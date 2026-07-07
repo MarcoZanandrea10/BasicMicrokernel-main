@@ -1,9 +1,12 @@
 #include "inode.h"
 #include "string.h"
 
+// Guarda os metadados dos arquivos e diretórios
+
 static inode_t inode_table[TREEFS_MAX_INODES];
 static uint8_t inode_bitmap[TREEFS_MAX_INODES];
 
+// Reseta um inode, limpa os dados e marca os blocos como inválidos
 static void inode_reset(inode_t *node, uint32_t id)
 {
     memset(node, 0, sizeof(inode_t));
@@ -13,6 +16,7 @@ static void inode_reset(inode_t *node, uint32_t id)
         node->blocks[i] = TREEFS_INVALID_BLOCK;
 }
 
+// Inicializa os inodes e marca todos como livres
 void inode_table_init(void)
 {
     memset(inode_bitmap, 0, sizeof(inode_bitmap));
@@ -21,6 +25,7 @@ void inode_table_init(void)
         inode_reset(&inode_table[i], i);
 }
 
+// Busca um inode alocado pelo numero
 inode_t *inode_get(uint32_t inode)
 {
     if (inode >= TREEFS_MAX_INODES || !inode_bitmap[inode])
@@ -29,6 +34,7 @@ inode_t *inode_get(uint32_t inode)
     return &inode_table[inode];
 }
 
+// Aloca no primeiro inode livre
 inode_t *inode_alloc(void)
 {
     for (uint32_t i = 0; i < TREEFS_MAX_INODES; i++)
@@ -45,6 +51,7 @@ inode_t *inode_alloc(void)
     return 0;
 }
 
+// Libera um inode para ser reutilizado
 void inode_free(uint32_t inode)
 {
     if (inode >= TREEFS_MAX_INODES)
@@ -54,6 +61,7 @@ void inode_free(uint32_t inode)
     inode_reset(&inode_table[inode], inode);
 }
 
+// Conta quantos inodes estão em uso
 uint32_t inode_used_count(void)
 {
     uint32_t used = 0;

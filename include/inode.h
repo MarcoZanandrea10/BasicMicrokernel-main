@@ -1,6 +1,9 @@
 #pragma once
 #include <stdint.h>
 
+// Metadados
+// O inode descreve arquivos/diretórios e aponta para seus blocos de dados
+
 #define TREEFS_MAX_INODES     64
 #define TREEFS_DIRECT_BLOCKS   8
 #define TREEFS_INVALID_BLOCK   0xFFFFFFFFU

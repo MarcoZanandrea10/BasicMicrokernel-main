@@ -123,26 +123,34 @@ static void free_inode_blocks(inode_t *file_inode)
  */
 static inode_t *resolve_path(const char *path, char *final_name)
 {
+    // Valida se o caminho existe e começa pela raiz /
     if (!path || path[0] != '/')
         return 0;
 
     uint32_t path_length = strlen(path);
+
+    // Impede caminho muito grande ou criação sem nome válido
     if (path_length >= TREEFS_MAX_PATH ||
         (final_name && (path_length == 1 || path[path_length - 1] == '/')))
         return 0;
 
+    // A busca sempre começa pelo inode raiz
     inode_t *current_inode = inode_get(TREEFS_ROOT_INODE);
+
     if (!final_name && path[1] == 0)
         return current_inode;
 
+    // Percorre cada parte do caminho
     for (uint32_t cursor = 1; path[cursor];)
     {
         char component_name[TREEFS_MAX_NAME];
         uint32_t component_start = cursor;
 
+        // Encontra o fim do componente atual até chegar em /
         while (path[cursor] && path[cursor] != '/')
             cursor++;
 
+        // Copia o nome do componente atual para buscar no diretório
         if (copy_component_name(component_name,
                                 path + component_start,
                                 cursor - component_start) != 0)
@@ -151,17 +159,21 @@ static inode_t *resolve_path(const char *path, char *final_name)
         while (path[cursor] == '/')
             cursor++;
 
+        // Se for criação, retorna o diretório pai e guarda o nome final
         if (final_name && !path[cursor])
         {
             strcpy(final_name, component_name);
             return directory_entries(current_inode) ? current_inode : 0;
         }
 
+        // Busca o componente atual dentro do diretório atual
         current_inode = find_entry(current_inode, component_name, 0);
+
         if (!current_inode)
             return 0;
     }
 
+    // Retorna o inode encontrado 
     return final_name ? 0 : current_inode;
 }
 
@@ -197,6 +209,7 @@ static int create_node(const char *path, uint32_t node_type)
     return (int)new_inode->id;
 }
 
+// Inicializa o TreeFS, configura o superblock, limpa os inodes e cria a estrutura inicial
 int fs_init(void)
 {
     filesystem_info.signature = TREEFS_SIGNATURE;
@@ -213,11 +226,13 @@ int fs_init(void)
         init_directory(root_inode) != 0)
         return -1;
 
+    // Cria os diretórios padrão da raiz
     return mkdir("/home") == 0 &&
            mkdir("/tmp") == 0 &&
            mkdir("/bin") == 0 ? 0 : -1;
 }
 
+// Interface para buscar o inode de um caminho completo
 inode_t *path_lookup(const char *path)
 {
     return resolve_path(path, 0);
@@ -228,7 +243,7 @@ int mkdir(const char *path)
     return create_node(path, TREEFS_TYPE_DIR) < 0 ? -1 : 0;
 }
 
-/* Para simplificar, o fd retornado eh o proprio id do inode criado. */
+// Para simplificar, o fd retornado é o proprio id do inode criado
 int create(const char *path)
 {
     return create_node(path, TREEFS_TYPE_FILE);

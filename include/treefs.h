@@ -3,6 +3,9 @@
 #include "inode.h"
 #include "block.h"
 
+// Metadados do sistema e diretórios 
+// Superblock descreve o FS e dir_entry liga nome ao inode
+
 #define TREEFS_SIGNATURE       0x54524653U
 #define TREEFS_MAX_NAME        24
 #define TREEFS_MAX_PATH        128

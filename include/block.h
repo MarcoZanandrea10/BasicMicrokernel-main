@@ -1,6 +1,9 @@
 #pragma once
 #include <stdint.h>
 
+// Dados
+// Define os blocos onde o conteúdo real dos arquivos é armazenado
+
 #define TREEFS_BLOCK_SIZE      256
 #define TREEFS_MAX_BLOCKS      128
 
